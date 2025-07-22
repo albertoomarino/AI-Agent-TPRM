@@ -39,10 +39,19 @@ def compute_trust_score(row):
 def plot_trust_score(df, ticker, date_str):
     plt.figure(figsize=(10, 5))
     df["Trust Score"].plot(
-        linestyle="-", title=f"{ticker} - Trust Score Trend")
+        linestyle="-", title=f"{ticker} - Trust Score Trend", label="Trust Score")
     plt.ylabel("Trust Score (0-10)")
     plt.xlabel("Date")
     plt.grid(True)
+
+    # Linea rossa della media, PRIMA del savefig
+    if "Aggregated" in df.index:
+        avg_score = df.loc["Aggregated", "Trust Score"]
+        if pd.notna(avg_score):
+            plt.axhline(y=avg_score, color="red", linestyle="--",
+                        linewidth=1, label="Avg Trust Score")
+            plt.legend()
+
     plt.tight_layout()
     plt.savefig(f"{output_dir}/{ticker}_ts_{date_str}.png")
     plt.close()
@@ -69,8 +78,26 @@ def process_vendor(ticker, name, all_data):
 
     stock_data = get_stock_data(ticker)
     stock_data["Trust Score"] = stock_data.apply(compute_trust_score, axis=1)
-    stock_data.to_csv(f"{output_dir}/{ticker}_stock_{today}.csv")
+
+    # Calcola il Trust Score aggregato (media)
+    aggregated_score = stock_data["Trust Score"].mean()
+
+    # Aggiunge una riga 'Aggregated' nel CSV (ultima riga)
+    stock_data.loc["Aggregated"] = [None] * \
+        (stock_data.shape[1] - 1) + [aggregated_score]
+
+    # Grafico ora include la linea rossa della media
     plot_trust_score(stock_data, ticker, today)
+
+    # Salva il CSV aggiornato
+    stock_data.to_csv(f"{output_dir}/{ticker}_stock_{today}.csv")
+
+    # Salva anche il valore aggregato in un file .txt
+    with open(f"{output_dir}/{ticker}_aggregated_score.txt", "w") as f:
+        f.write(
+            f"Aggregated Trust Score ({period}): {aggregated_score:.2f}")
+
+    # Salva i dati anche nel dizionario condiviso
     all_data[ticker] = stock_data
 
 
