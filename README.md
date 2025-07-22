@@ -8,26 +8,26 @@ The agent collects financial data, derives behavioral indicators, and computes a
 
 ## Getting Started
 
-1. **Create and activate a virtual environment (recommended)**
+1. **Create and activate a virtual environment**
 
     ```bash
     python3 -m venv venv
     source venv/bin/activate
     ```
 
-2. Install dependencies
+2. **Install dependencies**
 
     ```bash
     pip install -r requirements.txt
     ```
 
-3. Run the script
+3. **Run the script**
 
     ```bash
     python3 monitor.py
     ```
 
-4. Check the `monitoring/` folder
+4. **Check the `monitoring/` folder**
 
     You'll find:
 
@@ -35,9 +35,13 @@ The agent collects financial data, derives behavioral indicators, and computes a
     - `.png` plots of trust score trends;
     - `.txt` file with aggregated trust score value.
 
-## Parametri considerati
+5. **At the end, deactivate a virtual environment**
 
-### Raw Data from Yahoo Finance
+    ```bash
+    deactivate
+    ```
+
+## Raw Data from Yahoo Finance
 
 For each monitored vendor (e.g., Microsoft, IBM, NVIDIA), the system retrieves the following financial data:
 
@@ -53,7 +57,7 @@ For each monitored vendor (e.g., Microsoft, IBM, NVIDIA), the system retrieves t
 
 **Note**: Dividends and stock splits are infrequent and may appear as 0 for most days.
 
-### Derived Indicators
+## Derived Indicators
 
 The agent computes several indicators to assess vendor stability and detect anomalies:
 
