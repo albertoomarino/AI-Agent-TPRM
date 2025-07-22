@@ -1,119 +1,84 @@
 import yfinance as yf
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
 from datetime import datetime
 import os
-import feedparser
-import matplotlib.pyplot as plt
-import json
 
-# STEP 1 – Download stock data
+from config import vendors, period, interval, output_dir
+
+os.makedirs(output_dir, exist_ok=True)
 
 
-def get_stock_data(ticker="MSFT"):
+def get_stock_data(ticker):
     stock = yf.Ticker(ticker)
-    hist = stock.history(period="7d", interval="1d")
-    hist['Percent Change'] = hist['Close'].pct_change() * 100
-    hist = hist.round(2)
-    return hist
-
-# STEP 2 – Calculate indicators
-
-
-def enhance_stock_data(df):
-    df['Close_MA_3'] = df['Close'].rolling(window=3).mean()
-    df['Close_STD_3'] = df['Close'].rolling(window=3).std()
-    df['Volume_MA_3'] = df['Volume'].rolling(window=3).mean()
-    df['Volume_Spike'] = df['Volume'] > (df['Volume_MA_3'] * 2)
-    df['Down_Trend'] = df['Close'] < df['Close'].shift(1)
-    df['Consecutive_Drops'] = df['Down_Trend'].rolling(window=3).sum()
-    return df
-
-# STEP 3 – Scoring logic
+    hist = stock.history(period=period,
+                         interval=interval)
+    hist["Percent Change"] = hist["Close"].pct_change() * 100
+    hist["Close_MA_3"] = hist["Close"].rolling(window=3).mean()
+    hist["Close_STD_3"] = hist["Close"].rolling(window=3).std()
+    hist["Volume_MA_3"] = hist["Volume"].rolling(window=3).mean()
+    hist["Volume_Spike"] = hist["Volume"] > (hist["Volume_MA_3"] * 2)
+    hist["Down_Trend"] = hist["Close"] < hist["Close"].shift(1)
+    hist["Consecutive_Drops"] = hist["Down_Trend"].rolling(window=3).sum()
+    return hist.round(2)
 
 
 def compute_trust_score(row):
     score = 10
-    if abs(row['Percent Change']) > 1:
+    if abs(row["Percent Change"]) > 1:
         score -= 1
-    if row['Close_STD_3'] and row['Close_STD_3'] > 3:
+    if pd.notna(row["Close_STD_3"]) and row["Close_STD_3"] > 3:
         score -= 2
-    if row['Volume_Spike']:
+    if row["Volume_Spike"]:
         score -= 1
-    if row['Consecutive_Drops'] and row['Consecutive_Drops'] >= 3:
+    if pd.notna(row["Consecutive_Drops"]) and row["Consecutive_Drops"] >= 3:
         score -= 2
     return max(score, 0)
 
-# STEP 4 – News via RSS
 
-
-def get_latest_news(company="Microsoft"):
-    query = company.replace(" ", "+")
-    url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(url)
-    news_list = []
-    for entry in feed.entries[:5]:
-        news_list.append((entry.title, entry.link))
-    return news_list
-
-# STEP 5 – Save news
-
-
-def save_news_to_txt(news, filename):
-    with open(filename, "w", encoding="utf-8") as f:
-        for title, link in news:
-            f.write(f"{title}\n{link}\n\n")
-
-# STEP 6 – Plot Trust Score
-
-
-def plot_trust_score(df, ticker, date_str, output_dir="monitoring"):
+def plot_trust_score(df, ticker, date_str):
     plt.figure(figsize=(10, 5))
-    df['Trust Score'].plot(marker='o', linestyle='-',
-                           title=f"{ticker} - Trust Score Trend")
+    df["Trust Score"].plot(
+        linestyle="-", title=f"{ticker} - Trust Score Trend")
     plt.ylabel("Trust Score (0-10)")
     plt.xlabel("Date")
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/{ticker}_trust_score_plot_{date_str}.png")
+    plt.savefig(f"{output_dir}/{ticker}_ts_{date_str}.png")
     plt.close()
 
-# MAIN RUNNER
 
-
-def save_monitoring_data_with_visuals(ticker="MSFT", company_name="Microsoft"):
+def plot_combined_trust_scores(all_data):
+    plt.figure(figsize=(12, 6))
+    for ticker, df in all_data.items():
+        df["Trust Score"].plot(label=ticker)
+    plt.title("Trust Score Comparison Across Vendors")
+    plt.ylabel("Trust Score")
+    plt.xlabel("Date")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
     today = datetime.today().strftime("%Y-%m-%d")
-    directory = "monitoring"
-    os.makedirs(directory, exist_ok=True)
+    plt.savefig(f"{output_dir}/global_ts_{today}.png")
+    plt.close()
 
-    # Data pipeline
+
+def process_vendor(ticker, name, all_data):
+    today = datetime.today().strftime("%Y-%m-%d")
+    print(f"[INFO] Processing {name} ({ticker})")
+
     stock_data = get_stock_data(ticker)
-    stock_data = enhance_stock_data(stock_data)
-    stock_data['Trust Score'] = stock_data.apply(compute_trust_score, axis=1)
-
-    # Save all
-    stock_data.to_csv(f"{directory}/{ticker}_stock_{today}.csv")
-    news = get_latest_news(company_name)
-    save_news_to_txt(news, f"{directory}/{ticker}_news_{today}.txt")
-    plot_trust_score(stock_data, ticker, today, directory)
-
-    print(f"[INFO] Monitoring package saved for {ticker} on {today}")
+    stock_data["Trust Score"] = stock_data.apply(compute_trust_score, axis=1)
+    stock_data.to_csv(f"{output_dir}/{ticker}_stock_{today}.csv")
+    plot_trust_score(stock_data, ticker, today)
+    all_data[ticker] = stock_data
 
 
-# Run everything
 if __name__ == "__main__":
-    vendors = [
-        {"ticker": "MSFT", "name": "Microsoft"},
-        {"ticker": "IBM", "name": "IBM"},
-        {"ticker": "ORCL", "name": "Oracle"},
-        {"ticker": "AMZN", "name": "Amazon Web Services"},
-        {"ticker": "GOOGL", "name": "Google Cloud"}
-    ]
-
+    combined_data = {}
     for vendor in vendors:
-        print(f"\n[INFO] Processing {vendor['name']} ({vendor['ticker']})")
         try:
-            save_monitoring_data_with_visuals(vendor['ticker'], vendor['name'])
+            process_vendor(vendor["ticker"], vendor["name"], combined_data)
         except Exception as e:
             print(f"[ERROR] Failed for {vendor['ticker']}: {e}")
+    plot_combined_trust_scores(combined_data)
