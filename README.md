@@ -86,18 +86,18 @@ The agent is designed to work with publicly listed ICT providers, whose financia
 
 - **Software, Platforms, and IT Operations**
 
-| Company           | Ticker | Description                               |
-| ----------------- | ------ | ----------------------------------------- |
-| NVIDIA            | NVDA   | AI hardware, GPUs, cloud data centers     |
-| Cisco Systems     | CSCO   | Networking, security, infrastructure      |
-| ServiceNow        | NOW    | IT service management, workflows          |
-| Salesforce        | CRM    | CRM, analytics, SaaS platforms            |
-| Atlassian         | TEAM   | Jira, Confluence, cloud development tools |
-| Adobe             | ADBE   | Creative and document cloud platforms     |
-| HP Enterprise     | HPE    | Hybrid IT, edge-to-cloud infrastructure   |
-| Dell Technologies | DELL   | Servers, storage, enterprise solutions    |
+    | Company           | Ticker | Description                               |
+    | ----------------- | ------ | ----------------------------------------- |
+    | NVIDIA            | NVDA   | AI hardware, GPUs, cloud data centers     |
+    | Cisco Systems     | CSCO   | Networking, security, infrastructure      |
+    | ServiceNow        | NOW    | IT service management, workflows          |
+    | Salesforce        | CRM    | CRM, analytics, SaaS platforms            |
+    | Atlassian         | TEAM   | Jira, Confluence, cloud development tools |
+    | Adobe             | ADBE   | Creative and document cloud platforms     |
+    | HP Enterprise     | HPE    | Hybrid IT, edge-to-cloud infrastructure   |
+    | Dell Technologies | DELL   | Servers, storage, enterprise solutions    |
 
-**Note**: You can include any of these vendors in your `config.py` file by adding their stock ticker and name. Make sure the ticker is valid on Yahoo Finance.
+    **Note**: You can include any of these vendors in your `config.py` file by adding their stock ticker and name. Make sure the ticker is valid on Yahoo Finance.
 
 ### `period` and `interval` parameters
 
