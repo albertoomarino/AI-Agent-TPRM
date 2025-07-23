@@ -109,21 +109,21 @@ The `period` and `interval` parameters define how much historical data is collec
 
     | Value    | Description                  |
     |----------|------------------------------|
-    | `"1d"`   | 1 day                        |
-    | `"5d"`   | 5 days                       |
-    | `"7d"`   | 7 days                       |
-    | `"14d"`  | 14 days                      |
-    | `"1mo"`  | 1 month                      |
-    | `"3mo"`  | 3 months                     |
-    | `"6mo"`  | 6 months                     |
-    | `"1y"`   | 1 year                       |
-    | `"2y"`   | 2 years                      |
-    | `"5y"`   | 5 years                      |
-    | `"10y"`  | 10 years                     |
-    | `"ytd"`  | Year-to-date (from Jan 1st)  |
-    | `"max"`  | Full historical data         |
+    | `1d`     | 1 day                        |
+    | `5d`     | 5 days                       |
+    | `7d`     | 7 days                       |
+    | `14d`    | 14 days                      |
+    | `1mo`    | 1 month                      |
+    | `3mo`    | 3 months                     |
+    | `6mo`    | 6 months                     |
+    | `1y`     | 1 year                       |
+    | `2y`     | 2 years                      |
+    | `5y`     | 5 years                      |
+    | `10y`    | 10 years                     |
+    | `ytd`    | Year-to-date (from Jan 1st)  |
+    | `max`    | Full historical data         |
 
-    **Note**: If you use `interval="1h"` (hourly data), the maximum allowed period is `"730d"` (2 years).
+    **Note**: If you use `interval="1h"` (hourly data), the maximum allowed period is `730d` (2 years).
 
 - `interval` (Sampling frequency)
 
@@ -131,21 +131,21 @@ The `period` and `interval` parameters define how much historical data is collec
 
     | Value     | Description                         |
     |-----------|-------------------------------------|
-    | `"1m"`    | Every 1 minute *(recent days only)* |
-    | `"2m"`    | Every 2 minutes                     |
-    | `"5m"`    | Every 5 minutes                     |
-    | `"15m"`   | Every 15 minutes                    |
-    | `"30m"`   | Every 30 minutes                    |
-    | `"60m"`   | Every 1 hour                        |
-    | `"1h"`    | Every 1 hour (same as "60m")        |
-    | `"90m"`   | Every 90 minutes                    |
-    | `"1d"`    | Daily                               |
-    | `"5d"`    | Every 5 days                        |
-    | `"1wk"`   | Weekly                              |
-    | `"1mo"`   | Monthly                             |
-    | `"3mo"`   | Quarterly                           |
+    | `1m`      | Every 1 minute *(recent days only)* |
+    | `2m`      | Every 2 minutes                     |
+    | `5m`      | Every 5 minutes                     |
+    | `15m`     | Every 15 minutes                    |
+    | `30m`     | Every 30 minutes                    |
+    | `60m`     | Every 1 hour                        |
+    | `1h`      | Every 1 hour (same as "60m")        |
+    | `90m`     | Every 90 minutes                    |
+    | `1d`      | Daily                               |
+    | `5d`      | Every 5 days                        |
+    | `1wk`     | Weekly                              |
+    | `1mo`     | Monthly                             |
+    | `3mo`     | Quarterly                           |
 
-    **Note**: Minute-level intervals (`1m`, `5m`, etc.) only work with short periods like `"7d"` or `"14d"`.
+    **Note**: Minute-level intervals (`1m`, `5m`, etc.) only work with short periods like `7d` or `14d`.
 
 ## Input Metrics and Trust Evaluation Logic
 
