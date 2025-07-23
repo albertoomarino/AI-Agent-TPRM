@@ -77,25 +77,25 @@ The agent is designed to work with publicly listed ICT providers, whose financia
 
 - **Cybersecurity and Identity Management**
 
-    | Company            | Ticker | Description                             |
-    | ------------------ | ------ | --------------------------------------- |
-    | Palo Alto Networks | PANW   | Advanced threat protection              |
-    | Fortinet           | FTNT   | Network firewalls, endpoint security    |
-    | CrowdStrike        | CRWD   | Threat intelligence, endpoint detection |
-    | Okta               | OKTA   | Identity and access management          |
+    | Company             | Ticker | Description                                |
+    | ------------------- | ------ | ------------------------------------------ |
+    | Palo Alto Networks  | PANW   | Advanced threat protection                 |
+    | Fortinet            | FTNT   | Network firewalls, endpoint security       |
+    | CrowdStrike         | CRWD   | Threat intelligence, endpoint detection    |
+    | Okta                | OKTA   | Identity and access management             |
 
 - **Software, Platforms, and IT Operations**
 
-    | Company           | Ticker | Description                               |
-    | ----------------- | ------ | ----------------------------------------- |
-    | NVIDIA            | NVDA   | AI hardware, GPUs, cloud data centers     |
-    | Cisco Systems     | CSCO   | Networking, security, infrastructure      |
-    | ServiceNow        | NOW    | IT service management, workflows          |
-    | Salesforce        | CRM    | CRM, analytics, SaaS platforms            |
-    | Atlassian         | TEAM   | Jira, Confluence, cloud development tools |
-    | Adobe             | ADBE   | Creative and document cloud platforms     |
-    | HP Enterprise     | HPE    | Hybrid IT, edge-to-cloud infrastructure   |
-    | Dell Technologies | DELL   | Servers, storage, enterprise solutions    |
+    | Company             | Ticker | Description                                |
+    | ------------------- | ------ | ------------------------------------------ |
+    | NVIDIA              | NVDA   | AI hardware, GPUs, cloud data centers      |
+    | Cisco Systems       | CSCO   | Networking, security, infrastructure       |
+    | ServiceNow          | NOW    | IT service management, workflows           |
+    | Salesforce          | CRM    | CRM, analytics, SaaS platforms             |
+    | Atlassian           | TEAM   | Jira, Confluence, cloud development tools  |
+    | Adobe               | ADBE   | Creative and document cloud platforms      |
+    | HP Enterprise       | HPE    | Hybrid IT, edge-to-cloud infrastructure    |
+    | Dell Technologies   | DELL   | Servers, storage, enterprise solutions     |
 
     **Note**: You can include any of these vendors in your `config.py` file by adding their stock ticker and name. Make sure the ticker is valid on Yahoo Finance.
 
@@ -107,21 +107,21 @@ The `period` and `interval` parameters define how much historical data is collec
 
     Valid values include:
 
-    | Value    | Description                  |
-    |----------|------------------------------|
-    | `1d`     | 1 day                        |
-    | `5d`     | 5 days                       |
-    | `7d`     | 7 days                       |
-    | `14d`    | 14 days                      |
-    | `1mo`    | 1 month                      |
-    | `3mo`    | 3 months                     |
-    | `6mo`    | 6 months                     |
-    | `1y`     | 1 year                       |
-    | `2y`     | 2 years                      |
-    | `5y`     | 5 years                      |
-    | `10y`    | 10 years                     |
-    | `ytd`    | Year-to-date (from Jan 1st)  |
-    | `max`    | Full historical data         |
+    | Value    | Description                          |
+    |----------|--------------------------------------|
+    | `1d`     | 1 day                                |
+    | `5d`     | 5 days                               |
+    | `7d`     | 7 days                               |
+    | `14d`    | 14 days                              |
+    | `1mo`    | 1 month                              |
+    | `3mo`    | 3 months                             |
+    | `6mo`    | 6 months                             |
+    | `1y`     | 1 year                               |
+    | `2y`     | 2 years                              |
+    | `5y`     | 5 years                              |
+    | `10y`    | 10 years                             |
+    | `ytd`    | Year-to-date (from Jan 1st)          |
+    | `max`    | Full historical data                 |
 
     **Note**: If you use `interval="1h"` (hourly data), the maximum allowed period is `730d` (2 years).
 
