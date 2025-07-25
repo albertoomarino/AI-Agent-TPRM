@@ -104,6 +104,8 @@ def plot_trust_score(df, ticker, date_str):
     plt.ylabel("Trust Score (0-10)")
     plt.xlabel("Date")
 
+    plt.ylim(0, 10)
+
     # Show grid lines for easier reading
     plt.grid(True)
 
