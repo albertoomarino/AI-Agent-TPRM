@@ -1,1 +1,1 @@
-Aggregated Trust Score (365d): 8.81
+Aggregated Trust Score (50d): 8.66

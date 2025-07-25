@@ -2,6 +2,9 @@
 import yfinance as yf           # Library to fetch financial data from Yahoo Finance
 # Library for working with tabular data (dataframes)
 import pandas as pd
+import numpy as np
+import seaborn as sns
+
 import matplotlib.pyplot as plt  # Library to create charts and plots
 from datetime import datetime   # Module to work with dates and times
 import os                       # Module to interact with the file system
@@ -124,41 +127,103 @@ def plot_trust_score(df, ticker, date_str):
     plt.savefig(f"{output_dir}/{ticker}_ts_{date_str}.png")
     plt.close()
 
+"""
+La funzione plot_combined_trust_scores ha l’obiettivo di generare un grafico unico e comparativo che mostri l’evoluzione nel tempo del Trust Score per ciascun fornitore monitorato. Questo grafico è utile per valutare e confrontare la performance e l’affidabilità di più vendor in un colpo solo.
+
+Funzionamento generale
+La funzione riceve in input i dati di tutti i fornitori, precedentemente elaborati, e li unifica in un unico contenitore. In questo modo, ogni punto rappresenta il valore del Trust Score per un determinato fornitore in un preciso momento temporale.
+
+Tuttavia, per evitare un grafico troppo affollato e poco leggibile — soprattutto quando l’intervallo di analisi è molto ampio (es. un anno) e quindi contiene centinaia di punti — la funzione adatta il livello di dettaglio del grafico in base alla lunghezza del periodo di osservazione specificato in config.py.
+
+Comportamento adattivo in base al periodo
+Se il periodo di osservazione è breve (30 giorni o meno), il grafico mostra tutti i punti originali, consentendo una visualizzazione dettagliata e ad alta risoluzione delle variazioni giornaliere (o orarie) del Trust Score per ogni fornitore.
+
+Se invece il periodo è più lungo di 30 giorni, la funzione esegue un’aggregazione mensile, calcolando la media del Trust Score per ciascun mese. Questo consente di mantenere leggibilità e sintesi, senza sacrificare il significato dei dati. Il risultato è un grafico che evidenzia le tendenze generali mese per mese, invece di mostrare ogni singolo dato.
+
+Output
+Il grafico risultante, salvato in automatico come immagine (.png) nella cartella di output, mostra:
+
+L’asse X con le date (oppure i mesi medi, se il periodo è lungo)
+
+L’asse Y con il Trust Score, sempre normalizzato tra 0 e 10
+
+Una linea per ciascun fornitore, distinta da colori e marcatori differenti
+
+Una legenda per identificare ogni vendor
+
+Finalità
+Lo scopo finale di questa funzione è rendere chiaro a colpo d’occhio quali fornitori sono più stabili, affidabili o critici nel tempo, attraverso una rappresentazione comparativa e adattata dinamicamente alla densità del periodo monitorato. Questo è particolarmente utile in un contesto di Third-Party Risk Management, dove il confronto tra fornitori è fondamentale per decisioni di governance e continuità operativa.
+"""
 
 def plot_combined_trust_scores(all_data):
     """
-    Creates a single line chart to compare Trust Scores across all vendors.
-    Each vendor's Trust Score is shown with a different colored line.
-    The chart is saved as an image in the output folder.
+    Plots an aggregated Trust Score comparison across vendors.
+    If the configured period is longer than 30 days (e.g. '31d', '2mo', '1y'),
+    it aggregates the data monthly to improve readability.
     """
 
-    # Create a new figure for the combined chart
+    import re
+    from matplotlib.dates import DateFormatter
+
+    # Helper: convert period string to approximate day count
+    def period_to_days(p):
+        match = re.match(r"(\d+)([a-zA-Z]+)", p)
+        if not match:
+            return 0
+        value, unit = int(match.group(1)), match.group(2)
+        if unit == "d":
+            return value
+        elif unit == "mo":
+            return value * 30
+        elif unit == "y":
+            return value * 365
+        else:
+            return 0  # fallback
+
+    period_days = period_to_days(period)
+    use_monthly_avg = period_days > 30
+
+    # Collect all vendor data in a single dataframe
+    records = []
+
+    for ticker, df in all_data.items():
+        df = df[df.index != "Aggregated"].reset_index()
+        df.rename(columns={df.columns[0]: "Date"}, inplace=True)
+        df["Vendor"] = ticker
+        records.append(df[["Date", "Trust Score", "Vendor"]])
+
+    combined_df = pd.concat(records)
+    combined_df = combined_df[combined_df["Date"] != "Aggregated"]
+    combined_df["Date"] = pd.to_datetime(combined_df["Date"], errors="coerce")
+    combined_df = combined_df.dropna(subset=["Date"])
+
     plt.figure(figsize=(12, 6))
 
-    # Loop through all vendors and plot their Trust Scores
-    for ticker, df in all_data.items():
-        # Use vendor ticker as legend label
-        df["Trust Score"].plot(label=ticker)
+    if use_monthly_avg:
+        combined_df["Date"] = combined_df["Date"].dt.tz_localize(None)
+        combined_df["Month"] = combined_df["Date"].dt.to_period("M")
 
-    # Set chart title and axis labels
+        monthly_avg = combined_df.groupby(["Month", "Vendor"])["Trust Score"].mean().reset_index()
+        monthly_avg["Month"] = monthly_avg["Month"].dt.to_timestamp()
+
+        for vendor in monthly_avg["Vendor"].unique():
+            df = monthly_avg[monthly_avg["Vendor"] == vendor]
+            plt.plot(df["Month"], df["Trust Score"], label=vendor, marker='o')
+    else:
+        for vendor in combined_df["Vendor"].unique():
+            df = combined_df[combined_df["Vendor"] == vendor]
+            plt.plot(df["Date"], df["Trust Score"], label=vendor, linestyle='-', marker='.')
+
     plt.title("Trust Score Comparison Across Vendors")
-    plt.ylabel("Trust Score")
+    plt.ylabel("Trust Score (0–10)")
     plt.xlabel("Date")
-
-    # Add legend to identify each vendor
-    plt.legend()
-
-    # Add grid lines for readability
+    plt.ylim(0, 10)
     plt.grid(True)
-
-    # Adjust layout spacing
+    plt.legend()
     plt.tight_layout()
 
-    # Save the chart with today's date in the filename
     today = datetime.today().strftime("%Y-%m-%d")
     plt.savefig(f"{output_dir}/global_ts_{today}.png")
-
-    # Close the plot to free memory
     plt.close()
 
 

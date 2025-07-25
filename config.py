@@ -9,7 +9,7 @@ vendors = [
 ]
 
 # Time period for historical data to analyze (how far back to look)
-period = "365d"
+period = "50d"
 
 # Data sampling frequency (granularity)
 interval = "1d"
