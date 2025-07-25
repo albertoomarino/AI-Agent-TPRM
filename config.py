@@ -9,11 +9,10 @@ vendors = [
 ]
 
 # Time period for historical data to analyze (how far back to look)
-period = "1y"
+period = "6mo"
 
 # Data sampling frequency (granularity)
 interval = "1d"
 
 # Folder where output files (CSV, images, etc.) will be saved
 output_dir = "monitoring"
-

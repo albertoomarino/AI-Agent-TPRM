@@ -129,6 +129,7 @@ def plot_trust_score(df, ticker, date_str):
     plt.savefig(f"{output_dir}/{ticker}_ts_{date_str}.png")
     plt.close()
 
+
 """
 La funzione plot_combined_trust_scores ha l’obiettivo di generare un grafico unico e comparativo che mostri l’evoluzione nel tempo del Trust Score per ciascun fornitore monitorato. Questo grafico è utile per valutare e confrontare la performance e l’affidabilità di più vendor in un colpo solo.
 
@@ -156,6 +157,7 @@ Una legenda per identificare ogni vendor
 Finalità
 Lo scopo finale di questa funzione è rendere chiaro a colpo d’occhio quali fornitori sono più stabili, affidabili o critici nel tempo, attraverso una rappresentazione comparativa e adattata dinamicamente alla densità del periodo monitorato. Questo è particolarmente utile in un contesto di Third-Party Risk Management, dove il confronto tra fornitori è fondamentale per decisioni di governance e continuità operativa.
 """
+
 
 def plot_combined_trust_scores(all_data):
     """
@@ -205,7 +207,8 @@ def plot_combined_trust_scores(all_data):
         combined_df["Date"] = combined_df["Date"].dt.tz_localize(None)
         combined_df["Month"] = combined_df["Date"].dt.to_period("M")
 
-        monthly_avg = combined_df.groupby(["Month", "Vendor"])["Trust Score"].mean().reset_index()
+        monthly_avg = combined_df.groupby(["Month", "Vendor"])[
+            "Trust Score"].mean().reset_index()
         monthly_avg["Month"] = monthly_avg["Month"].dt.to_timestamp()
 
         for vendor in monthly_avg["Vendor"].unique():
@@ -214,7 +217,8 @@ def plot_combined_trust_scores(all_data):
     else:
         for vendor in combined_df["Vendor"].unique():
             df = combined_df[combined_df["Vendor"] == vendor]
-            plt.plot(df["Date"], df["Trust Score"], label=vendor, linestyle='-', marker='.')
+            plt.plot(df["Date"], df["Trust Score"],
+                     label=vendor, linestyle='-', marker='.')
 
     plt.title("Trust Score Comparison Across Vendors")
     plt.ylabel("Trust Score (0–10)")
@@ -242,7 +246,7 @@ def process_vendor(ticker, name, all_data):
     today = datetime.today().strftime("%Y-%m-%d")
 
     # Print progress message in the terminal
-    print(f"[INFO] Processing {name} ({ticker})")
+    print(f"\nCOMPANY: {name} ({ticker})")
 
     # Get stock data and calculate financial indicators
     stock_data = get_stock_data(ticker)
@@ -252,6 +256,19 @@ def process_vendor(ticker, name, all_data):
 
     # Compute the average Trust Score over the entire period
     aggregated_score = stock_data["Trust Score"].mean()
+
+    # Interpretazione del punteggio aggregato
+    if pd.notna(aggregated_score):
+        if aggregated_score >= 8:
+            status = "RELIABLE: the vendor is considered stable"
+        elif 5 <= aggregated_score < 8:
+            status = "WARNING: the vendor shows some signals and should be monitored"
+        else:
+            status = "AT RISK: the vendor may require further evaluation or action"
+        print(f"Trust Score = {aggregated_score:.2f} → {status}")
+    else:
+        print("Trust Score = nan → AT RISK: the vendor may require further evaluation or action")
+
 
     # Add a new row to the DataFrame to store the average score
     stock_data.loc["Aggregated"] = [None] * \
@@ -277,6 +294,8 @@ if __name__ == "__main__":
     It loops through all vendors, processes their data,
     and generates the final comparison chart.
     """
+
+    print(f"Initial Configuration: \n- Period: {period} \n- Interval: {interval}")
 
     # Create an empty dictionary to store all vendors' processed data
     combined_data = {}
