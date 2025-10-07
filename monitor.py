@@ -17,7 +17,7 @@ def get_stock_data(ticker):
     hist = stock.history(period=period, interval=interval)
 
     # Daily percent change in stock price
-    hist["Percent Change"] = hist["Close"].pct_change() * 100
+    hist["Percent_Change"] = hist["Close"].pct_change() * 100
     
     # 3-day moving average of closing price
     hist["Close_MA_3"] = hist["Close"].rolling(window=3).mean()
@@ -46,13 +46,13 @@ def compute_trust_score(row):
     vol_penalty = min(row["Close_STD_3"] / 2, 3) if pd.notna(row["Close_STD_3"]) else 0
     
     # Penalty for large daily price changes
-    change_penalty = min(abs(row["Percent Change"]) / 2, 2)
+    change_penalty = min(abs(row["Percent_Change"]) / 2, 2)
     
     # Penalty for a negative spike in volume
-    spike_penalty = 1 if row["Volume_Spike"] and row["Percent Change"] <= 0 else 0
+    spike_penalty = 1 if row["Volume_Spike"] and row["Percent_Change"] <= 0 else 0
     
     # Bonus for a positive spike in volume
-    spike_bonus = 1 if row["Volume_Spike"] and row["Percent Change"] > 0 else 0
+    spike_bonus = 1 if row["Volume_Spike"] and row["Percent_Change"] > 0 else 0
     
     # Penalty for 3 or more consecutive price drops
     drops_penalty = (
