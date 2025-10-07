@@ -28,13 +28,13 @@ This AI agent specifically contributes to the IORC's capabilities by providing a
 
 Here's a quick guide to the main files included in this project:
 
-- `monitor.py` is the main script. It contains the logic for retrieving financial data, calculating indicators and Trust Scores, generating plots, and saving outputs for each vendor.
+* `monitor.py` is the main script. It contains the logic for retrieving financial data, calculating indicators and Trust Scores, generating plots, and saving outputs for each vendor.
 
-- `config.py` allows you to configure the tool. Here you define which vendors to monitor, how much historical data to collect (via the `period` parameter), how frequently to sample it (`interval`), and where to save the results.
+* `config.py` allows you to configure the tool. Here you define which vendors to monitor, how much historical data to collect (via the `period` parameter), how frequently to sample it (`interval`), and where to save the results.
 
-- `requirements.txt` lists all the required Python packages.
+* `requirements.txt` lists all the required Python packages.
 
-- Once the program is executed, a `monitoring/` folder is automatically created. This directory will contain CSV files with financial data and computed scores, trend plots for each vendor, and logs with the aggregated Trust Scores.
+* Once the program is executed, a `monitoring/` folder is automatically created. This directory will contain CSV files with financial data and computed scores, trend plots for each vendor, and logs with the aggregated Trust Scores.
 
 Before launching the tool, make sure to check and customize the vendor list and parameters inside `config.py` to match your monitoring needs.
 
@@ -63,9 +63,9 @@ Before launching the tool, make sure to check and customize the vendor list and 
 
     You'll find:
 
-    - `.csv` files with daily metrics and trust scores;
-    - `.png` plots of trust score trends;
-    - `.txt` file with aggregated trust score value.
+    * `.csv` files with daily metrics and trust scores;
+    * `.png` plots of trust score trends;
+    * `.txt` file with aggregated trust score value.
 
 5. At the end, deactivate a virtual environment
 
@@ -189,17 +189,64 @@ The retrieved data includes:
 
 To evaluate the reliability of each vendor over time, the system calculates a set of behavioral indicators based on historical stock data. These indicators help detect signs of instability, risk, or unusual market activity.
 
-Specifically, the agent computes:
+Specifically, the agent computes the following indicators:
 
-* `Percent Change`: This metric captures how much the closing price has changed compared to the previous interval (e.g., the previous hour or day). Sudden large variations — for example, a spike or drop greater than ±5% — may signal news events or abnormal market behavior.
+* **`Percent_Change`**: This metric calculates the percentage variation of the closing price compared to the previous interval. It measures the immediate volatility of the stock.
 
-* `Close_MA_3`: This is the moving average of the closing price over the last 3 time periods. It serves to smooth out short-term fluctuations and highlight the general trend of the stock.
+    $$ Percent\_Change_t = \left( \frac{Close_t - Close_{t-1}}{Close_{t-1}} \right) \times 100 $$
 
-* `Close_STD_3`: The standard deviation of the closing price over the last 3 periods. Higher values indicate greater volatility, which is often associated with increased uncertainty or risk.
+    Where:
+  * $Close_t$: The closing price at the current time period $t$.
+  * $Close_{t-1}$: The closing price at the previous time period $t-1$.
 
-* `Volume_MA_3` and `Volume_Spike`: The system computes the average trading volume over 3 periods and flags a "spike" if the current volume exceeds twice that average. A spike may suggest abnormal interest in the stock — potentially due to insider activity, speculative moves, or unexpected news.
+* **`Close_MA_3`**: This is the 3-period moving average of the closing price. It computes the average of closing prices over the last 3 periods, helping to smooth short-term fluctuations and identify general trends.
 
-* `Consecutive_Drops`: This indicator counts how many consecutive periods the stock has closed lower than the previous one. A downward trend lasting 3 or more periods may reflect market concerns or a loss of confidence in the vendor.
+    $$ Close\_MA_t = \frac{Close_t + Close_{t-1} + Close_{t-2}}{3} $$
+
+    Where:
+  * $Close_t$: The closing price at the current time period $t$.
+  * $Close_{t-1}$: The closing price at the previous time period $t-1$.
+  * $Close_{t-2}$: The closing price at two time periods prior to $t$.
+
+* **`Close_STD_3`**: This is the 3-period standard deviation of the closing price, measuring stock volatility over 3 periods. A high standard deviation indicates price instability.
+
+    $$ Close\_STD_t = \sqrt{\frac{1}{3} \sum_{i=0}^{2} (Close_{t-i} - Close\_MA_t)^2} $$
+
+    Where:
+  * $Close_{t-i}$: The closing price at time period $t-i$.
+  * $Close\_MA_t$: The moving average calculated for the current time period $t$.
+
+* **`Volume_MA_3`**: This is the 3-period moving average of the trading volume. It calculates the average trading volume over the last 3 periods, useful for comparing current volume with recent behavior.
+
+    $$ Volume\_MA_t = \frac{Volume_t + Volume_{t-1} + Volume_{t-2}}{3} $$
+
+    Where:
+  * $Volume_t$: The trading volume at the current time period $t$.
+  * $Volume_{t-1}$: The trading volume at the previous time period $t-1$.
+  * $Volume_{t-2}$: The trading volume at two time periods prior to $t$.
+
+* **`Volume_Spike`**: This flag indicates the detection of anomalous volume spikes. A value of 1 signifies that the current volume is more than twice the recent average, potentially signaling extraordinary events or market turbulence.
+
+    $$ Volume\_Spike_t = \begin{cases} 1 & \text{if } Volume_t > 2 \times Volume\_MA_t \\ 0 & \text{otherwise} \end{cases} $$
+
+    Where:
+  * $Volume_t$: The trading volume at the current time period $t$.
+  * $Volume\_MA_t$: The moving average of the trading volume calculated for the current time period $t$.
+
+* **`Down_Trend`**: This flag indicates a downward trend. A value of 1 means the stock closed lower than the previous period, useful for identifying moments of decline.
+
+    $$ Down\_Trend_t = \begin{cases} 1 & \text{if } Close_t < Close_{t-1} \\ 0 & \text{otherwise} \end{cases} $$
+
+    Where:
+  * $Close_t$: The closing price at the current time period $t$.
+  * $Close_{t-1}$: The closing price at the previous time period $t-1$.
+
+* **`Consecutive_Drops`**: This indicator counts how many of the last 3 periods registered a price drop. More consecutive drops signal a potential deterioration of investor confidence.
+
+    $$ Consecutive\_Drops_t = \sum_{i=0}^{2} Down\_Trend_{t-i} $$
+
+    Where:
+  * $Down\_Trend_{t-i}$: The `Down_Trend` indicator value at time period $t-i$.
 
 ### Trust Score Logic Calculation and Risk Interpretation
 
